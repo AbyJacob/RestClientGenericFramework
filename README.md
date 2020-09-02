@@ -4,3 +4,5 @@
 
 
 Generic Rest Template Client based on Spring Boot for Qualys Container Security
+
+Check URIs @ localhost:8080/swagger-ui.html
