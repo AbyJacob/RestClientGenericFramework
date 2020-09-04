@@ -12,4 +12,4 @@ Generic Rest Client ...WIP
 .Connect multiple endpoints , implemented with interceptors allowing different auth schemes and request 
   response logging
 .Request Timeout , Request Retry and Recovery 
-.Attempt to follow best practices 
+.Attempt to follow best practices and blah blah
