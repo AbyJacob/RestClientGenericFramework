@@ -70,29 +70,6 @@ public class QualysConfig {
 
 	}
 
-	/*
-	 * //move to twist files
-	 * 
-	 * @Bean (value="twistRestTemplate") public RestTemplate
-	 * twistRestTemplate(@Autowired RestTemplateBuilder builder) {
-	 * 
-	 * 
-	 * 
-	 * RestTemplate twistRestTemplate = new RestTemplate();
-	 * twistRestTemplate.setInterceptors(List.of(new
-	 * qualysRestTemplateInterceptor()));
-	 * LOGGER.info("[POINT]Created RestTemplate Bean for Twist :"); return
-	 * twistRestTemplate;
-	 * 
-	 * 
-	 * LOGGER.info("[POINT]Created RestTemplate Bean for Twist :"); return builder
-	 * .setConnectTimeout(Duration.ofSeconds(7))
-	 * .setReadTimeout(Duration.ofSeconds(7)) .interceptors(List.of(new
-	 * qualysRestTemplateInterceptor())) .build();
-	 * 
-	 * 
-	 * }
-	 */
 
 	// take interceptor out
 	private class qualysRestTemplateInterceptor implements ClientHttpRequestInterceptor {
@@ -104,17 +81,14 @@ public class QualysConfig {
 			LOGGER.info("Attempt Rest Call :"+request.toString());
 			ClientHttpResponse response = null;
 			try {
-				System.out.println("before request fire 1");
 				long time_1 = System.currentTimeMillis();
 				response = execution.execute(request, body);
 				long time_2 = System.currentTimeMillis();
 				System.out.println("after request fire 2  time: " + (time_2 - time_1));
 			} catch (IOException ie) {
-				System.out.println("here 3");
 				LOGGER.error("IO Error While Connecting to Qualys Client");
 				throw ie;
 			} catch (Exception e) {
-				System.out.println("here 4");
 				LOGGER.error("Error While Connecting to Qualys Client");
 			}
 			/*

@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 
+import org.json.XML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,12 +38,18 @@ public class TwistLockConfig {
 	@Value("${connection.qualys.password}")
 	private String pPass;
 
+	public static final String QualysAgentIdentifier = "Cloud Agent";
+	public static final String QualysAgentHeader = "X-Requested-With";
+
+	
 	private HttpHeaders header() {
+		
 		HttpHeaders httpHeaders = new HttpHeaders(); 
-		httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-		httpHeaders.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+		httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
+		httpHeaders.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_XML_VALUE);
+		httpHeaders.set(QualysAgentHeader,QualysAgentIdentifier);
 		//Commented Auth header for testing open API 
-		//httpHeaders.setBasicAuth(uName, pPass);
+		httpHeaders.setBasicAuth(uName, pPass);
 		LOGGER.info("[POINT]Create header :"+httpHeaders.toString());
 		return httpHeaders;
 	}
@@ -50,8 +57,6 @@ public class TwistLockConfig {
 //move to twist files 
 	@Bean (value="twistRestTemplate")
 	public RestTemplate twistRestTemplate(@Autowired RestTemplateBuilder builder) { 
-
-		
 		/*
 		 * RestTemplate twistRestTemplate = new RestTemplate();
 		 * twistRestTemplate.setInterceptors(List.of(new
@@ -62,12 +67,10 @@ public class TwistLockConfig {
 		
 		LOGGER.info("[POINT]Created RestTemplate Bean for Twist :");
 		return builder
-		        .setConnectTimeout(Duration.ofSeconds(7))
-		        .setReadTimeout(Duration.ofSeconds(7))
+				.setConnectTimeout(Duration.ofSeconds(60))
+		        .setReadTimeout(Duration.ofSeconds(60))
 		        .interceptors(List.of(new twistRestTemplateInterceptor()))
 		        .build();
-
-		
 	}
 
 
@@ -82,23 +85,43 @@ public class TwistLockConfig {
 			LOGGER.info("Attempt TWIST Rest Call :"+request.toString());
 			ClientHttpResponse response = null;
 			try {
-				System.out.println("before request fire 1" );
 				long time_1 = System.currentTimeMillis();
 				response = execution.execute(request, body);
 				long time_2 = System.currentTimeMillis();
 				System.out.println("after request fire 2  time: "+ (time_2 - time_1));
+				LOGGER.info("response available from vul :"
+				+ response.getStatusCode()
+				+"||"
+				+ response.getStatusText()
+				+"||"
+				+response.getBody()
+				+"||"
+			//	+bodyToString(response.getBody()) 
+				);
+				
+					
 			}catch(IOException ie) {
-				System.out.println("here 3");
 				LOGGER.error("IO Error While Connecting to Qualys Client");
 				throw ie;
 			}catch(Exception e){
-				System.out.println("here 4");
 				LOGGER.error("Error While Connecting to Qualys Client");
 			}
 			/* Throws java.io.IOException: stream is closed
 			 * finally { if(response != null) response.close(); }
 			 */
+			
 			return response;
 		}
-	}
+		
+		/*
+		 * private String bodyToString(InputStream body) throws IOException {
+		 * StringBuilder builder = new StringBuilder(); BufferedReader bufferedReader =
+		 * new BufferedReader(new InputStreamReader(body, StandardCharsets.UTF_8));
+		 * String line = bufferedReader.readLine(); while (line != null) {
+		 * builder.append(line).append(System.lineSeparator()); line =
+		 * bufferedReader.readLine(); } bufferedReader.close(); return
+		 * builder.toString(); }
+		 */
+    }
+	
 }

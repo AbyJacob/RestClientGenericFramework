@@ -26,6 +26,7 @@ package com.sedai.sops.secure.connectors.qualys.service;
 
 import java.net.URI;
 
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -35,6 +36,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -65,12 +67,15 @@ import lombok.RequiredArgsConstructor;
 
 			Logger LOGGER = LoggerFactory.getLogger(TwistGetAllContainersService.class);
 
-			String response; // int COUNTER = 1;
+			//String response; // int COUNTER = 1;
 
+			String response = null ;  
+			
 			@Retryable(value = { RestClientException.class, RuntimeException.class },maxAttempts = 4, backoff = @Backoff(multiplier = 3)) 
 			public String	getAllContainers() 
 			{ 
-				response = "No Container";
+			
+			response = "No Container";
 
 			// [TODO] implement fetch with pagination filter //
 			//'https://<QualysURL>/csapi/v1.1/containers?pageNo=1&pageSize=50&sort=created%3Adesc' 
@@ -82,16 +87,21 @@ import lombok.RequiredArgsConstructor;
 				//URI url = URI.create("https://jsonplaceholder.typicode.com/posts"); 
 			
 			//START commenting for testing - Open API - with delay  			
-				URI url = URI.create("https://www.mocky.io/v2/5185415ba171ea3a00704eed?mocky-delay=5000ms");
+				//URI url = URI.create("https://www.mocky.io/v2/5185415ba171ea3a00704eed?mocky-delay=5000ms");
 				//OBSERVATION : Time out setting in Rest Template works 
 				//Throws the following error : RestClientException Error While Connecting 
 				//to Qualys ClientI/O error on GET request for "https://www.mocky.io/v2/5185415ba171ea3a00704eed": 
 				//Read timed out; nested exception is java.net.SocketTimeoutException: Read timed out
 			
+			URI url = URI.create("https://qualysapi.qg1.apps.qualys.in/api/2.0/fo/asset/host/vm/detection/?action=list"); 
+				
 			try
 			{ 
-				response = twistRestTemplate.getForObject(url, String.class);
-				
+
+				response = twistRestTemplate.getForObject(url, String.class); 
+
+			// System.out.println("source xml 1 to string"+response.toString()); 
+								
 			} 
 			catch (RestClientException re) 
 			{
@@ -105,7 +115,13 @@ import lombok.RequiredArgsConstructor;
 							} catch (RuntimeException rte) 
 								{
 										LOGGER.error("RestClientException Error While Connecting to Qualys Client");
-									}
+									} 
+			/*
+			 * catch (TransformerConfigurationException e) { // TODO Auto-generated catch
+			 * block e.printStackTrace(); } catch (TransformerException e) { // TODO
+			 * Auto-generated catch block e.printStackTrace(); }
+			 */
+										
 
 		/*
 		 * if(COUNTER == 1) throw new RuntimeException(); else if(COUNTER == 2) throw
@@ -122,4 +138,14 @@ import lombok.RequiredArgsConstructor;
 				.info("[TwistGetAllContainersService] Qualys Connecton failed: Audit to be implemented"+ response); 
 				return response; 
 			} 
+			
+	/*
+	 * private String bodyToString(InputStream body) throws IOException {
+	 * StringBuilder builder = new StringBuilder(); BufferedReader bufferedReader =
+	 * new BufferedReader(new InputStreamReader(body, StandardCharsets.UTF_8));
+	 * String line = bufferedReader.readLine(); while (line != null) {
+	 * builder.append(line).append(System.lineSeparator()); line =
+	 * bufferedReader.readLine(); } bufferedReader.close(); return
+	 * builder.toString(); }
+	 */
 		}
